@@ -153,7 +153,7 @@ else:
             const table = document.querySelector('.styled-table');
             const tableContainer = document.querySelector('.styled-table-container');
 
-            html2canvas(tableContainer).then(function (canvas) {{
+            html2canvas(tableContainer, {{backgroundColor: null}}).then(function (canvas) {{
                 const image = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
                 link.href = image;
