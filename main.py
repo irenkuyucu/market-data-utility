@@ -7,7 +7,7 @@ import os
 import sys
 
 # Step 2: Define the ticker symbols and corresponding full names
-ticker_symbols = {'XU100.IS': 'BIST 100', '^GSPC': 'S&P 500', '^STOXX': 'Euro Stoxx 600', 'USDTRY=X': 'USD/TRY', 'EURTRY=X': 'EUR/TRY', 'GC=F': 'Altın (ons)'}
+ticker_symbols = {'^STOXX': 'Stoxx 600', '^GSPC': 'S&P 500', 'EURUSD=X': 'EUR/USD', 'GC=F': 'Gold', 'BZ=F': 'Brent Oil', 'NG=F': 'Natural Gas'}
 
 # Step 3: Get the financial data
 # Get the current time in GMT+3 timezone
@@ -30,13 +30,12 @@ else:
 # Filter the data to keep only the 'Close' column
 data = data['Close']
 
-# Set the Pandas display options to show all rows and columns without truncation
-pd.set_option('display.max_rows', None)
-pd.set_option('display.max_columns', None)
-
 # Print the raw data table for debugging
 print("Raw Data Table:")
 print(data)
+
+# Ensure that the data and ticker symbols are aligned correctly
+data = data[list(ticker_symbols.keys())]
 
 # Perform calculations on the raw data
 if len(data) < 2:
@@ -47,26 +46,22 @@ else:
     percent_change = ((latest_closing_data - previous_closing_data) / previous_closing_data) * 100
     closing_prices = [round(latest_closing_data[ticker], 2) for ticker in ticker_symbols.keys()]
 
-    # Create a list of tickers in the order specified in the ticker_symbols dictionary
-    tickers_ordered = list(ticker_symbols.keys())
+    # Align the percent change values with the correct tickers
+    percent_change_dict = {ticker: percent for ticker, percent in zip(ticker_symbols.keys(), percent_change)}
 
-    # Reindex the DataFrame to match the order of tickers in the ticker_symbols dictionary
+    # Present the results in a table
     closing_data_df = pd.DataFrame({
-        'Ticker': list(ticker_symbols.values()),
-        'Last Close': closing_prices,
+        'Instrument': list(ticker_symbols.values()),
+        'Latest Closing': closing_prices,
         'Trend': [
-            f'<span class="positive-change">▲</span>' if x >= 0 else f'<span class="negative-change">▼</span>'
-            for x in percent_change
-        ],
-        'Percent Symbol': [
-            f'<span class="positive-change">%</span>' if x >= 0 else f'<span class="negative-change">%</span>'
-            for x in percent_change
+            f'<span class="positive-change">▲</span>' if percent_change_dict[ticker] >= 0 else f'<span class="negative-change">▼</span>'
+            for ticker in ticker_symbols.keys()
         ],
         'Percent Change': [
-            f'<span class="positive-change">{format(abs(x), ".2f")}</span>' if x >= 0 else f'<span class="negative-change">{format(abs(x), ".2f")}</span>'
-            for x in percent_change
+            f'<span class="positive-change">{format(percent_change_dict[ticker], ".2f")}</span>' if percent_change_dict[ticker] >= 0 else f'<span class="negative-change">{format(percent_change_dict[ticker], ".2f")}</span>'
+            for ticker in ticker_symbols.keys()
         ]
-    }).reindex(tickers_ordered)
+    })
 
     # Convert the DataFrame to an HTML table without index and header row
     table_html = closing_data_df.to_html(index=False, header=False, escape=False, classes=['styled-table'])
@@ -103,6 +98,7 @@ else:
                 border-left: 0px solid #e5e5e5;
                 border-right: 1px solid #e5e5e5;
                 text-align: left;
+                width: 150px;
             }}
 
             .styled-table td:nth-child(2) {{
@@ -120,23 +116,13 @@ else:
                 border-right: 0px solid #e5e5e5;
                 font-size: 19pt;
             }}
-            
+
             .styled-table td:nth-child(4) {{
                 border-top: 0px solid #e5e5e5;
                 border-bottom: 1px solid #e5e5e5;
                 border-left: 0px solid #e5e5e5;
                 border-right: 0px solid #e5e5e5;
                 text-align: left;
-                padding-right: 4px;
-            }}
-
-            .styled-table td:nth-child(5) {{
-                border-top: 0px solid #e5e5e5;
-                border-bottom: 1px solid #e5e5e5;
-                border-left: 0px solid #e5e5e5;
-                border-right: 0px solid #e5e5e5;
-                text-align: left;
-                padding-left: 4px;
             }}
 
             .styled-table-container {{
