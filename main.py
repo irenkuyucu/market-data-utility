@@ -58,7 +58,7 @@ else:
             for ticker in ticker_symbols.keys()
         ],
         'Percent Change': [
-            f'<span class="positive-change">{format(percent_change_dict[ticker], ".2f")}</span>' if percent_change_dict[ticker] >= 0 else f'<span class="negative-change">{format(percent_change_dict[ticker], ".2f")}</span>'
+            f'<span class="positive-change">{format(abs(percent_change_dict[ticker]), ".2f")} %</span>' if percent_change_dict[ticker] >= 0 else f'<span class="negative-change">{format(abs(percent_change_dict[ticker]), ".2f")} %</span>'
             for ticker in ticker_symbols.keys()
         ]
     })
